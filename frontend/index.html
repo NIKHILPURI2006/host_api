@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Navigator</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Map Navigator</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search location...">
+                <button id="searchBtn">Search</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="route-planner">
+                    <h3>Route Planner</h3>
+                    <input type="text" id="startPoint" placeholder="Start point">
+                    <input type="text" id="endPoint" placeholder="Destination">
+                    <button id="planRoute">Plan Route</button>
+                    <div id="routeInfo"></div>
+                </div>
+                
+                <div class="saved-locations">
+                    <h3>Saved Locations</h3>
+                    <ul id="locationsList"></ul>
+                </div>
+            </div>
+
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
