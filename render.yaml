@@ -11,7 +11,7 @@ services:
           name: mapnavigator-db
           property: connectionString
 
-  - type: static
+  - type: static_site
     name: map-navigator-frontend
     buildCommand: |
       cd frontend
