@@ -6,11 +6,8 @@ services:
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     envVars:
-      - key: MONGODB_URI
-        fromDatabase:
-          name: mapnavigator-db
-          property: connectionString
-
+  - key: MONGODB_URI
+    value: mongodb+srv://mapnavigator:Nikhil@12@Cluster0.mongodb.net/mapnavigator?retryWrites=true&w=majority
   - type: static_site
     name: map-navigator-frontend
     buildCommand: |
