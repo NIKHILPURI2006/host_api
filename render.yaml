@@ -9,7 +9,9 @@ services:
       - key: MONGODB_URI
         value: "mongodb+srv://mapnavigator:Nikhil@12@cluster0.xxx.mongodb.net/mapnavigator?retryWrites=true&w=majority"
 
-  - type: static_site
+  - type: web
     name: map-navigator-frontend
-    buildCommand: echo "Building frontend..."
-    publishPath: ./frontend
+    env: static
+    plan: free
+    buildCommand: echo "Frontend building completed"
+    staticPublishPath: ./frontend
