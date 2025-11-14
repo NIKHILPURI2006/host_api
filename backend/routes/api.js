@@ -2,14 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Location = require('../models/Location');
 
-// ✅ ADD THIS - Handle OPTIONS preflight for all API routes
-router.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.status(200).send();
-});
-
 // Get all locations
 router.get('/locations', async (req, res) => {
   try {
@@ -22,15 +14,15 @@ router.get('/locations', async (req, res) => {
 
 // Add new location
 router.post('/locations', async (req, res) => {
-  const location = new Location({
-    name: req.body.name,
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
-    type: req.body.type,
-    description: req.body.description
-  });
-
   try {
+    const location = new Location({
+      name: req.body.name,
+      latitude: req.body.latitude,
+      longitude: req.body.longitude,
+      type: req.body.type || 'landmark',
+      description: req.body.description
+    });
+
     const newLocation = await location.save();
     res.status(201).json(newLocation);
   } catch (error) {
@@ -40,28 +32,43 @@ router.post('/locations', async (req, res) => {
 
 // Calculate route between two points
 router.post('/route', async (req, res) => {
-  const { startLat, startLng, endLat, endLng } = req.body;
-  
-  // Simple distance calculation (Haversine formula)
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  }
+  try {
+    const { startLat, startLng, endLat, endLng } = req.body;
+    
+    console.log('📍 Route calculation request:', { startLat, startLng, endLat, endLng });
+    
+    // Simple distance calculation (Haversine formula)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
 
-  const distance = calculateDistance(startLat, startLng, endLat, endLng);
-  
-  res.json({
-    distance: distance.toFixed(2),
-    start: { lat: startLat, lng: startLng },
-    end: { lat: endLat, lng: endLng }
-  });
+    const distance = calculateDistance(startLat, startLng, endLat, endLng);
+    
+    console.log('📏 Calculated distance:', distance);
+    
+    res.json({
+      distance: distance.toFixed(2),
+      start: { lat: startLat, lng: startLng },
+      end: { lat: endLat, lng: endLng },
+      message: 'Route calculated successfully'
+    });
+  } catch (error) {
+    console.error('❌ Route calculation error:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Handle OPTIONS for all routes in this router
+router.options('*', (req, res) => {
+  res.status(200).json({});
 });
 
 module.exports = router;

@@ -1,19 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 
-// CORS Middleware - Handle BEFORE routes
+// NUCLEAR CORS FIX - Manual headers for everything
 app.use((req, res, next) => {
+    // Set CORS headers for ALL responses
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
     
-    // Handle preflight requests
+    // Immediately respond to OPTIONS requests
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+        console.log('🔄 Handling OPTIONS preflight request');
+        return res.status(200).json({});
     }
     
     next();
@@ -40,11 +42,19 @@ app.use('/api', require('./routes/api'));
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'OK', 
-        database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+        database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+        cors: 'Enabled'
     });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('🚨 Server error:', err);
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌐 CORS enabled for all origins`);
 });
