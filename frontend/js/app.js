@@ -3,7 +3,7 @@ class MapNavigator {
         this.map = null;
         this.markers = [];
         this.routeLayer = null;
-        this.apiBaseUrl = 'https://map-navigator-backend.onrender.com/api';
+        this.apiBaseUrl = 'https://map-navigator-backend-yovm.onrender.com/api';
         
         this.initMap();
         this.bindEvents();
