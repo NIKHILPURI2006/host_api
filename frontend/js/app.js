@@ -126,71 +126,89 @@ class MapNavigator {
         }
     }
 
-    async planRoute() {
-        const startInput = document.getElementById('startPoint').value;
-        const endInput = document.getElementById('endPoint').value;
+async planRoute() {
+    const startInput = document.getElementById('startPoint').value;
+    const endInput = document.getElementById('endPoint').value;
+    
+    if (!startInput || !endInput) {
+        alert('Please enter both start and end points');
+        return;
+    }
+
+    try {
+        console.log('🔄 Starting route planning...');
         
-        if (!startInput || !endInput) {
-            alert('Please enter both start and end points');
+        // Geocode start and end points
+        const [startResponse, endResponse] = await Promise.all([
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(startInput)}`),
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endInput)}`)
+        ]);
+
+        console.log('📍 Geocoding responses:', { startResponse, endResponse });
+
+        const [startData, endData] = await Promise.all([
+            startResponse.json(),
+            endResponse.json()
+        ]);
+
+        console.log('📍 Geocoding data:', { startData, endData });
+
+        if (startData.length === 0 || endData.length === 0) {
+            alert('Could not find one or both locations');
             return;
         }
 
-        try {
-            // Geocode start and end points
-            const [startResponse, endResponse] = await Promise.all([
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(startInput)}`),
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endInput)}`)
-            ]);
+        const start = startData[0];
+        const end = endData[0];
+        const startLat = parseFloat(start.lat);
+        const startLng = parseFloat(start.lon);
+        const endLat = parseFloat(end.lat);
+        const endLng = parseFloat(end.lon);
 
-            const [startData, endData] = await Promise.all([
-                startResponse.json(),
-                endResponse.json()
-            ]);
+        console.log('📍 Coordinates:', { startLat, startLng, endLat, endLng });
 
-            if (startData.length === 0 || endData.length === 0) {
-                alert('Could not find one or both locations');
-                return;
-            }
+        // Calculate route using our API
+        console.log('🔄 Calling route API...');
+        const routeResponse = await fetch(`${this.apiBaseUrl}/route`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                startLat: startLat,
+                startLng: startLng,
+                endLat: endLat,
+                endLng: endLng
+            })
+        });
 
-            const start = startData[0];
-            const end = endData[0];
-            const startLat = parseFloat(start.lat);
-            const startLng = parseFloat(start.lon);
-            const endLat = parseFloat(end.lat);
-            const endLng = parseFloat(end.lon);
-
-            // Calculate route using our API
-            const routeResponse = await fetch(`${this.apiBaseUrl}/route`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    startLat: startLat,
-                    startLng: startLng,
-                    endLat: endLat,
-                    endLng: endLng
-                })
-            });
-
-            const routeData = await routeResponse.json();
-
-            // Display route on map
-            this.displayRoute(startLat, startLng, endLat, endLng, routeData.distance);
-
-            // Show route info
-            document.getElementById('routeInfo').innerHTML = `
-                <strong>Route Information:</strong><br>
-                Distance: ${routeData.distance} km<br>
-                From: ${start.display_name}<br>
-                To: ${end.display_name}
-            `;
-
-        } catch (error) {
-            console.error('Route planning error:', error);
-            alert('Error planning route');
+        console.log('📡 Route API response status:', routeResponse.status);
+        
+        if (!routeResponse.ok) {
+            const errorText = await routeResponse.text();
+            console.error('❌ Route API error:', errorText);
+            throw new Error(`Route API failed: ${routeResponse.status}`);
         }
+
+        const routeData = await routeResponse.json();
+        console.log('✅ Route data received:', routeData);
+
+        // Display route on map
+        this.displayRoute(startLat, startLng, endLat, endLng, routeData.distance);
+
+        // Show route info
+        document.getElementById('routeInfo').innerHTML = `
+            <strong>Route Information:</strong><br>
+            Distance: ${routeData.distance} km<br>
+            From: ${start.display_name}<br>
+            To: ${end.display_name}
+        `;
+
+    } catch (error) {
+        console.error('💥 Route planning error:', error);
+        alert('Error planning route: ' + error.message);
     }
+}
 
     displayRoute(startLat, startLng, endLat, endLng, distance) {
         // Clear previous route

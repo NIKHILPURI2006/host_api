@@ -10,7 +10,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({
     origin: [
        'moonlit-maamoul-37863d.netlify.app',
-        'http://localhost:3000'
+       'https://map-navigator-backend-yovm.onrender.com',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
     ],
     credentials: true
 }));
