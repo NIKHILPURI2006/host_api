@@ -9,9 +9,8 @@ const PORT = process.env.PORT || 5000;
 // Middleware - Updated for production
 app.use(cors({
     origin: [
-        'https://map-navigator-frontend.onrender.com',
-        'http://localhost:3000',
-        'http://127.0.0.1:3000'
+       'https://your-map-navigator.netlify.app',
+        'http://localhost:3000'
     ],
     credentials: true
 }));
