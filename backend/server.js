@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware - Updated for production
 app.use(cors({
     origin: [
-       'https://your-map-navigator.netlify.app',
+       'moonlit-maamoul-37863d.netlify.app',
         'http://localhost:3000'
     ],
     credentials: true
