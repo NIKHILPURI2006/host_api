@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: map-navigator-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: MONGODB_URI
+        fromDatabase:
+          name: mapnavigator-db
+          property: connectionString
+
+  - type: static
+    name: map-navigator-frontend
+    buildCommand: |
+      cd frontend
+      # Update API URL for production
+      sed -i 's|http://localhost:5000|https://map-navigator-backend.onrender.com|g' js/app.js
+    publishPath: frontend
